@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Vault | Audit Logs</title>
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .admin-status { color: #10b981; font-weight: bold; margin-bottom: 15px; display: block; }
+        .hacker-status { color: #ef4444; font-weight: bold; margin-bottom: 15px; display: block; }
+        .decrypted-text { color: #10b981; font-family: 'Courier New', monospace; font-weight: bold; }
+    </style>
+</head>
+<body class="login-page">
+    <div class="auth-container"> 
+        <div class="auth-card vault-card">
+            <div class="auth-header">
+                <h1>Encrypted Database View</h1>
+                <p>PSU Capstone: Information Assurance & Encryption Test</p>
+                <span id="vault-status"></span>
+            </div>
+
+            <table class="vault-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Username</th>
+                        <th>Password (Stored Value)</th>
+                        <th>Encryption Status</th>
+                    </tr>
+                </thead>
+                <tbody id="vault-body">
+                </tbody>
+            </table>
+
+            <div class="auth-footer">
+                <button id="back-dash" class="login-btn hidden" onclick="window.location.href='index.html'" style="background: #2563eb; margin-bottom: 10px;">Back to Dashboard</button>
+                <button class="login-btn" onclick="window.location.href='login.html'">Logout to Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('mode') === 'admin';
+        
+        const MOCK_DB = [
+            { id: "USR-001", user: "Admin", pass: "admin123" },
+            { id: "USR-002", user: "Driver", pass: "driver123" },
+            { id: "USR-003", user: "Passenger", pass: "pax123" }
+        ];
+
+        function simulateEncryption(text) {
+            return btoa(text + "SALT_KEY_PSU").substring(0, 16).toUpperCase() + "...[ENCRYPTED]";
+        }
+
+        const statusEl = document.getElementById('vault-status');
+        const backBtn = document.getElementById('back-dash');
+        
+        if (isAdmin) {
+            statusEl.innerText = "● STATUS: ADMIN AUTHORIZED - AUTOMATIC DECRYPTION ACTIVE";
+            statusEl.className = "admin-status";
+            backBtn.classList.remove('hidden');
+        } else {
+            statusEl.innerText = "● STATUS: UNAUTHORIZED ACCESS DETECTED - DATA MASKED";
+            statusEl.className = "hacker-status";
+        }
+
+        const container = document.getElementById('vault-body');
+        
+        MOCK_DB.forEach(row => {
+            const displayPass = isAdmin ? row.pass : simulateEncryption(row.pass);
+            const passClass = isAdmin ? "decrypted-text" : "encrypted-text";
+            const statusLabel = isAdmin ? "Decrypted (Session Key)" : "AES-256 Protected";
+
+            const htmlRow = `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.user}</td>
+                    <td class="${passClass}">${displayPass}</td>
+                    <td><span class="status-badge">${statusLabel}</span></td>
+                </tr>
+            `;
+            container.innerHTML += htmlRow;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Secure Fare System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body class="dashboard-body">
+
+    <nav class="top-nav">
+        <div>
+            <h3>SECURE FARE</h3>
+            <small>Puerto Princesa City</small>
+        </div>
+        <div class="nav-actions">
+            <button class="sos-btn-nav" onclick="alert('Security Alert: Location & SOS sent to City Hall.')">SOS</button>
+            <button id="logout-btn" class="logout-link" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <main id="main-content" class="dashboard-grid">
+        
+        <section class="col-main">
+            <div class="card map-card">
+                <div class="card-header">
+                    <h3>Route Navigator</h3>
+                    <div class="status-pill-group">
+                        <span id="gps-status" class="pill">GPS: Unverified</span>
+                    </div>
+                </div>
+
+                <div id="map" style="height: 400px; border-radius: 12px;"></div>
+                
+                <div class="calc-controls">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Start Point</label>
+                            <input type="text" id="start-input" readonly placeholder="Detecting...">
+                        </div>
+                        <div class="input-group">
+                            <label>Destination</label>
+                            <input type="text" id="dest-input" readonly placeholder="Detecting...">
+                        </div>
+                    </div>
+                    
+                    <div class="fare-details-grid">
+                        <div class="stat-box">
+                            <label>Distance</label>
+                            <div class="value-wrap">
+                                <input type="text" id="dist-input" value="0.00" readonly>
+                                <span>km</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <label>Passengers</label>
+                            <input type="number" id="pax-input" value="1" min="1" onchange="calculateFare()">
+                        </div>
+                    </div>
+                    
+                    <div class="fare-total-display">
+                        <small>Estimated Secure Fare</small>
+                        <h2 id="fare-result">P0.00</h2>
+                    </div>
+                    
+                    <button class="action-btn success" onclick="calculateFare()">Update Secure Fare</button>
+                </div>
+            </div>
+        </section>
+
+        <aside class="col-side">
+            <div id="hacker-panel" class="card hacker-card">
+                <div class="card-header hacker">
+                    <h3>Exploit Lab</h3>
+                    <span class="tag">Testing Mode</span>
+                </div>
+                <div class="exploit-menu">
+                    <button onclick="triggerScrape()">Scrape Data</button>
+                    <button onclick="forceChangeFare()">Direct DB Write</button>
+                    <button onclick="simulateBruteForce()">Brute Force</button>
+                    <button onclick="injectSQL()">SQL Injection</button>
+                    <button onclick="bypassMFA()">Bypass MFA</button>
+                    <button onclick="spoofGPS()">Spoof GPS</button>
+                </div>
+            </div>
+
+            <div id="admin-section" class="card admin-card hidden">
+                <div class="card-header admin">
+                    <h3>Fare Management</h3>
+                </div>
+                <div class="admin-content">
+                    <div class="current-rate">
+                        <span>Current Base:</span>
+                        <strong>P<span id="current-base">15.00</span></strong>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="new-base-input" placeholder="Enter new rate">
+                    </div>
+                    <button class="action-btn dark" onclick="triggerMFA()">Update Matrix</button>
+                    
+                    <div class="admin-security-tools" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                        <small style="color: #94a3b8; display: block; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; font-size: 0.65rem;">Infrastructure Security</small>
+                        <div class="key-status-box" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+                                <span style="color: #94a3b8;">Master Key ID:</span>
+                                <span id="key-id" style="color: #60a5fa; font-family: monospace;">K-AES-9921-X</span>
+                            </div>
+                        </div>
+                        <button class="action-btn" style="background: transparent; border: 1px solid #f59e0b; color: #f59e0b; font-size: 0.8rem; padding: 8px; width: 100%; margin-bottom: 10px;" onclick="rotateKeys()">Rotate Encryption Keys</button>
+                        
+                        <button id="admin-data-btn" class="action-btn" style="background: var(--dark-accent); border: 1px solid var(--primary); width: 100%;" onclick="accessDatabase()">
+                            Access Encrypted Vault
+                        </button>
+                    </div>
+
+                    <div class="admin-session-monitor" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                        <small style="color: #94a3b8; display: block; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; font-size: 0.65rem;">Active Network Sessions</small>
+                        <div id="session-list" style="max-height: 100px; overflow-y: auto; margin-bottom: 8px;">
+                            <div class="session-row" style="background: rgba(15, 23, 42, 0.5); padding: 8px; border-radius: 6px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 0.7rem; color: #fff;">Admin_Lancesthur</div>
+                                    <div style="font-size: 0.6rem; color: #64748b;">IP: 192.168.1.105</div>
+                                </div>
+                                <span style="font-size: 0.6rem; color: var(--primary); font-weight: bold;">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="audit-section" class="card log-card">
+                <h3>Security Audit Trail</h3>
+                <div id="log-display" class="log-stream">
+                    <span class="log-entry">> System initialized...</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="scrape-loader" class="modal-overlay hidden" style="background: rgba(15, 23, 42, 0.95); z-index: 10001;">
+        <div class="mfa-box">
+            <h2 style="color: var(--primary); margin-bottom: 10px;">Intercepting Stream...</h2>
+            <div class="loading-bar-container" style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 25px; overflow: hidden;">
+                <div id="scrape-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 2s linear;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mfa-modal" class="modal-overlay hidden">
+        <div class="mfa-box">
+            <h4>Identity Verification</h4>
+            <div class="input-group">
+                <input type="password" id="mfa-pin" maxlength="6" placeholder="Enter PIN" style="text-align: center; font-size: 1.2rem;">
+            </div>
+            <div class="modal-btns">
+                <button class="btn-confirm" onclick="verifyAndSave()">Confirm Change</button>
+                <button class="btn-cancel" onclick="closeMFA()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

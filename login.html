@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Secure Tricycle Fare System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body class="login-page">
+    <div class="auth-container"> 
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Secure Fare Management System</p>
+            </div>
+            
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+
+            <div class="input-group">
+                <label>Login As</label>
+                <select id="role-select">
+                    <option value="Passenger">Passenger</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Hacker">Hacker (Security Test)</option>
+                </select>
+            </div>
+
+            <div id="error-message" class="error-text hidden">
+                Invalid credentials or role mismatch.
+            </div>
+            
+            <button class="login-btn" onclick="handleLogin(event)">Sign In</button>
+            
+            <div class="auth-footer">
+                <p>City Hall</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mfa-modal" class="modal-overlay hidden">
+        <div class="mfa-box">
+            <div class="auth-header">
+                <h1>Security Challenge</h1>
+                <p>Enter your 6-digit Security Token to authorize this session.</p>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="mfa-pin" maxlength="6" placeholder="••••••" autocomplete="off" 
+                       style="text-align: center; font-size: 1.5rem; letter-spacing: 12px; font-weight: bold;">
+            </div>
+
+            <div class="modal-btns">
+                <button class="btn-confirm" onclick="verifyMFA()">Verify Identity</button>
+                <button class="btn-cancel" onclick="closeMFA()">Cancel</button>
+            </div>
+            
+            <div class="auth-footer" style="margin-top: 20px; border: none;">
+                <p style="font-size: 0.65rem; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
+                    Administrator Level Access Required
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>
